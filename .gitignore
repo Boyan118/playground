@@ -9,3 +9,5 @@ wheels/
 # Virtual environments
 .venv
 assets
+notebooks/stats/bulls_cows_9k.pkl
+notebooks/stats/entropy_9k.pkl
