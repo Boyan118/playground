@@ -1,0 +1,29 @@
+[project]
+name = "playground-package"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "boyan", email = "173038095+Boyan118@users.noreply.github.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "ipykernel>=7.3.0",
+    "nbformat>=5.11.0",
+    "pandas>=3.0.5",
+    "plotly>=6.9.0",
+    "pygame-ce>=2.5.8",
+    "ruff>=0.16.2",
+]
+
+[project.scripts]
+playground_package = "playground_package.__main__:main"
+
+[build-system]
+requires = ["uv_build>=0.12.3,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest",
+]
