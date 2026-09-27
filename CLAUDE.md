@@ -20,6 +20,9 @@ expand the scope of the task.
 Never stage, commit or push unless I explicitly ask. I review, stage and
 commit changes myself. Use `rm`, not `git rm`.
 
+When reporting what you did, show the commands you ran where they're useful
+(e.g. `uv add --dev ruff`), so I can learn them and repeat them.
+
 ## Workflow and layout
 - Each topic is a package: `src/playground_package/<topic>/` holding its
   notebooks, code, data and Streamlit `page.py`.
