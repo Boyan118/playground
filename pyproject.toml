@@ -26,6 +26,7 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "ipykernel>=7.3.0",
+    "nbstripout>=0.9.1",
     "pytest",
     "ruff>=0.16.9",
 ]

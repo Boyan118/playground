@@ -10,9 +10,17 @@ Each topic lives in its own package under `src/playground_package/`.
 
 ## Setup
 
+After cloning (the devcontainer does this automatically):
+
 ```bash
 uv sync
+uv run nbstripout --install --attributes .gitattributes
 ```
+
+The second command registers a git filter that strips notebook outputs
+(plots, printed results) from what gets committed; your local notebooks keep
+them. It's stored in `.git/config`, which isn't cloned, so run it once per
+clone, and again if you recreate `.venv`.
 
 ## Streamlit app
 

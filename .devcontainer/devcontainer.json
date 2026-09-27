@@ -15,7 +15,10 @@
 				"anthropic.claude-code"
 			]
 		}
-	}
+	},
+
+	// Install dependencies and register the git filter that strips notebook outputs.
+	"postCreateCommand": "uv sync && uv run nbstripout --install --attributes .gitattributes"
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
