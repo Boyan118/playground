@@ -12,8 +12,8 @@
 - [ ] Update `.gitignore`: old `notebooks/stats/*.pkl` paths → topic `data/` folders; stop ignoring the space game's `assets`
 
 ### Bulls & Cows
-- [ ] Build file paths from `Path(__file__)` in `ui/page.py`
-- [ ] Replace the 405 MB dict-of-dicts pickle with a 9000×9000 numpy `uint8` table (~81 MB, encoding `bulls*5 + cows`), or compute it at startup
+- [x] Build file paths from `Path(__file__)` in `ui/page.py` (no longer needed: the page loads no files)
+- [x] Replace the 405 MB dict-of-dicts pickle with a 9000×9000 numpy `uint8` table (~81 MB, encoding `bulls*5 + cows`), or compute it at startup
 
 ## Later
 

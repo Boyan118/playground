@@ -1,10 +1,10 @@
-from collections import Counter
 import random
 from typing import Protocol
 
 import numpy as np
 
 from playground_package.bulls_and_cows.code.bulls_and_cows_game import BullsAndCowsGame
+from playground_package.bulls_and_cows.code.feedback_table import OFFSET, row_entropies
 
 
 class PlayStrategy(Protocol):
@@ -37,12 +37,12 @@ class EntropyStrategy(PlayStrategy):
             self,
             max_entropy_for_first_turn: float,
             first_turn_candidates: list[str],
-            bulls_cows_cache: dict[str, str]):
+            feedback_table: np.ndarray):
         self.turns_counter = 1
 
         self._first_turn_candidates = first_turn_candidates
         self._max_entropy_for_first_turn = max_entropy_for_first_turn
-        self.bulls_cows_cache = bulls_cows_cache
+        self.feedback_table = feedback_table
 
         self._last_guess = None
         self._feedbacks = []
@@ -60,10 +60,8 @@ class EntropyStrategy(PlayStrategy):
             top_guesses = self._first_turn_candidates[0:3]
             return [(g, self._max_entropy_for_first_turn) for g in top_guesses]
         else:
-            top_guesses = [
-                (candidate, self._calc_entropy(candidate, possibilities = self.remaining_possibilities))
-                for candidate in self.remaining_possibilities
-            ]
+            entropies = EntropyStrategy.calc_entropies(self.feedback_table, self.remaining_possibilities)
+            top_guesses = list(zip(self.remaining_possibilities, entropies.tolist()))
 
             top_guesses.sort(key=lambda x: x[1], reverse=True)
 
@@ -90,10 +88,6 @@ class EntropyStrategy(PlayStrategy):
         return np.log2(len(self.remaining_possibilities))
 
 
-    def _calc_entropy(self, guess: str, possibilities: list[str]):
-        return EntropyStrategy.calc_entropy_optimized(self.bulls_cows_cache, guess, possibilities)
-
-
     @staticmethod
     def reduce_set(possibilities: list[str], guess: str, bulls_and_cows: tuple[int, int]) -> list[str]:
         reduced_set = [
@@ -105,17 +99,12 @@ class EntropyStrategy(PlayStrategy):
 
 
     @staticmethod
-    def calc_entropy_optimized(bulls_cows_cache: dict[int, int], guess: str, possibilities: list[str]) -> float:
-        counter = Counter()
+    def calc_entropies(feedback_table: np.ndarray, possibilities: list[str]) -> np.ndarray:
+        """Entropy of each possibility when used as a guess against all the possibilities."""
+        indices = np.array([int(p) for p in possibilities]) - OFFSET
+        sub_table = feedback_table[np.ix_(indices, indices)]
 
-        for secret in possibilities:
-            bulls_and_cows = bulls_cows_cache[int(guess)][int(secret)]
-            counter[bulls_and_cows] += 1
-
-        total = counter.total()
-        entropy = sum(-(count / total) * np.log2(count / total) for count in counter.values())
-
-        return entropy
+        return row_entropies(sub_table)
 
 
 

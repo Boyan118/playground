@@ -1,10 +1,14 @@
-import pickle
-
+import numpy as np
 import streamlit as st
 
 from playground_package.bulls_and_cows.code.bulls_and_cows_game import (
     BullsAndCowsGame,
     GameState,
+)
+from playground_package.bulls_and_cows.code.feedback_table import (
+    NUMBERS,
+    build_feedback_table,
+    row_entropies,
 )
 from playground_package.bulls_and_cows.code.strategies import EntropyStrategy
 
@@ -21,36 +25,21 @@ st.set_page_config(
 
 @st.cache_resource
 def load_solver_data():
-    with open(
-        "src/playground_package/bulls_and_cows/data/entropy_9k.pkl",
-        "rb",
-    ) as f:
-        entropy_9k = pickle.load(f)
+    feedback_table = build_feedback_table()
 
-    with open(
-        "src/playground_package/bulls_and_cows/data/bulls_cows_9k.pkl",
-        "rb",
-    ) as f:
-        bulls_cows_cache = pickle.load(f)
-
-    candidates = sorted(
-        entropy_9k,
-        key=entropy_9k.get,
-        reverse=True,
-    )
-
-    max_val = entropy_9k[candidates[0]]
+    # Entropy of every number as a first guess, against all 9000 secrets.
+    entropies = row_entropies(feedback_table)
+    max_val = entropies.max()
 
     candidates = [
-        str(candidate)
-        for candidate in candidates
-        if entropy_9k[candidate] == max_val
+        str(number)
+        for number in NUMBERS[np.isclose(entropies, max_val)]
     ]
 
-    return max_val, candidates, bulls_cows_cache
+    return max_val, candidates, feedback_table
 
 
-max_val, candidates, bulls_cows_cache = load_solver_data()
+max_val, candidates, feedback_table = load_solver_data()
 
 
 # ---------------------------------------------------------------------------
@@ -67,7 +56,7 @@ if "strategy" not in st.session_state:
     st.session_state.strategy = EntropyStrategy(
         max_val,
         candidates,
-        bulls_cows_cache,
+        feedback_table,
     )
 
 
@@ -140,7 +129,7 @@ with header_right:
         st.session_state.strategy = EntropyStrategy(
             max_val,
             candidates,
-            bulls_cows_cache,
+            feedback_table,
         )
         st.session_state.guess_input = ""
         st.rerun()
