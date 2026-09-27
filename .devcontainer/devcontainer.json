@@ -11,7 +11,8 @@
 		"vscode": {
 			"extensions": [
 				"charliermarsh.ruff",
-				"ms-toolsai.jupyter"
+				"ms-toolsai.jupyter",
+				"anthropic.claude-code"
 			]
 		}
 	}
