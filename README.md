@@ -1,26 +1,40 @@
+# Playground
+
+A collection of experiments and small games for exploring concepts hands-on.
+Each topic lives in its own package under `src/playground_package/`.
+
 ## Prerequisites
 
-- Python 3.11+
-- uv
+- Python 3.14
+- [uv](https://docs.astral.sh/uv/)
 
-## From an empty project
+## Setup
 
 ```bash
 uv sync
 ```
 
-## Start the app
+## Streamlit app
 
-Run the project as a module:
+The Streamlit app hosts the interactive topic pages (currently Bulls & Cows):
 
 ```bash
-cd /home/boyan/repos_github/playground
+uv run streamlit run src/playground_package/streamlit_app/main.py
+```
+
+## Space game
+
+Running the package as a module starts the pygame space game:
+
+```bash
 uv run python -m playground_package
 ```
 
-Or run the Streamlit script directly:
+It expects a background image at `src/playground_package/space_game/assets/bg.jpeg`.
+
+## Development
 
 ```bash
-cd /home/boyan/repos_github/playground
-uv run streamlit run src/playground_package/streamlit_app/main.py
+uv run pytest
+uv run ruff check .
 ```

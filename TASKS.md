@@ -3,10 +3,10 @@
 ## Now
 
 ### Project cleanup
-- [ ] Delete the stray `=4.2.0` file at the repo root
-- [ ] Move `ruff` and `ipykernel` to the `dev` dependency group; declare `numpy` explicitly
-- [ ] Update the README: Python version (3.14), what `python -m playground_package` runs, how to start the app
-- [ ] Remove leftovers: `streamlit_app/pages/01. bulls_and_cows.py`, `calculator/` and its test, `main()` in `__init__.py`
+- [x] Delete the stray `=4.2.0` file at the repo root
+- [x] Move `ruff` and `ipykernel` to the `dev` dependency group; declare `numpy` explicitly
+- [x] Update the README: Python version (3.14), what `python -m playground_package` runs, how to start the app
+- [x] Remove leftovers: `streamlit_app/pages/01. bulls_and_cows.py`, `calculator/` and its test, `main()` in `__init__.py`
 - [ ] Move `notebooks/*` into their topic packages and remove the `notebooks/` folder
 - [ ] Strip notebook outputs (e.g. `nbstripout` as a git filter); `plant.ipynb` is 7 MB
 - [ ] Update `.gitignore`: old `notebooks/stats/*.pkl` paths → topic `data/` folders; stop ignoring the space game's `assets`

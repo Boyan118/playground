@@ -8,7 +8,6 @@ from playground_package.bulls_and_cows.code.bulls_and_cows_game import (
 )
 from playground_package.bulls_and_cows.code.strategies import EntropyStrategy
 
-
 st.set_page_config(
     page_title="Bulls & Cows",
     page_icon="🐂",

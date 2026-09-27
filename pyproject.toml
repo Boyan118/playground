@@ -8,12 +8,11 @@ authors = [
 ]
 requires-python = ">=3.14"
 dependencies = [
-    "ipykernel>=7.3.0",
     "nbformat>=5.11.0",
+    "numpy>=2.5.2",
     "pandas>=3.0.5",
     "plotly>=6.9.0",
     "pygame-ce>=2.5.8",
-    "ruff>=0.16.2",
     "streamlit>=1.64.0",
 ]
 
@@ -26,5 +25,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "ipykernel>=7.3.0",
     "pytest",
+    "ruff>=0.16.9",
 ]
