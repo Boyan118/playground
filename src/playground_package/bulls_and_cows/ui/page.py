@@ -200,7 +200,11 @@ with main_col:
             st.session_state.celebrate = False
 
     if game.game_state == GameState.IN_PROGRESS:
-        guess_col, hints_col = st.columns(2, gap="large")
+        if show_hints:
+            q, hints_col = st.columns(2, gap="large")
+        else:
+            # Without hints, the guess input takes the full width.
+            guess_col = st.container()
 
         with guess_col:
             with st.form("guess_form", clear_on_submit=True, border=False):
