@@ -4,7 +4,7 @@ from typing import Protocol
 import numpy as np
 
 from playground_package.bulls_and_cows.code.bulls_and_cows_game import BullsAndCowsGame
-from playground_package.bulls_and_cows.code.feedback_table import OFFSET, row_entropies
+from playground_package.bulls_and_cows.code.feedback_table import FeedbackTable
 
 
 class PlayStrategy(Protocol):
@@ -33,20 +33,16 @@ class IterateThroughAllPossibilitiesStrategy(PlayStrategy):
 
 
 class EntropyStrategy(PlayStrategy):
-    def __init__(
-            self,
-            max_entropy_for_first_turn: float,
-            first_turn_candidates: list[str],
-            feedback_table: np.ndarray):
+    def __init__(self, feedback_table: FeedbackTable):
         self.turns_counter = 1
 
-        self._first_turn_candidates = first_turn_candidates
-        self._max_entropy_for_first_turn = max_entropy_for_first_turn
         self.feedback_table = feedback_table
+        self._first_turn_candidates, self._max_entropy_for_first_turn = feedback_table.best_opening_guesses
 
         self._last_guess = None
         self._feedbacks = []
-        self.remaining_possibilities = [str(x) for x in range(1000, 10000)]
+        self.remaining_possibilities = list(feedback_table.numbers)
+        self.initial_entropy = self.calc_game_entropy()
 
 
     def set_guess(self, guess: str):
@@ -56,11 +52,10 @@ class EntropyStrategy(PlayStrategy):
 
     def generate_top_guesses(self) -> list[tuple[str, float]]:
         if self.turns_counter == 1:
-            random.shuffle(self._first_turn_candidates)
-            top_guesses = self._first_turn_candidates[0:3]
+            top_guesses = random.sample(self._first_turn_candidates, 3)
             return [(g, self._max_entropy_for_first_turn) for g in top_guesses]
         else:
-            entropies = EntropyStrategy.calc_entropies(self.feedback_table, self.remaining_possibilities)
+            entropies = self.feedback_table.entropies(self.remaining_possibilities, self.remaining_possibilities)
             top_guesses = list(zip(self.remaining_possibilities, entropies.tolist()))
 
             top_guesses.sort(key=lambda x: x[1], reverse=True)
@@ -98,13 +93,9 @@ class EntropyStrategy(PlayStrategy):
         return reduced_set
 
 
-    @staticmethod
-    def calc_entropies(feedback_table: np.ndarray, possibilities: list[str]) -> np.ndarray:
-        """Entropy of each possibility when used as a guess against all the possibilities."""
-        indices = np.array([int(p) for p in possibilities]) - OFFSET
-        sub_table = feedback_table[np.ix_(indices, indices)]
-
-        return row_entropies(sub_table)
+    def calc_guess_entropy(self, guess: str) -> float:
+        """Expected information (bits) of `guess` against the remaining possibilities."""
+        return float(self.feedback_table.entropies([guess], self.remaining_possibilities)[0])
 
 
 

@@ -20,8 +20,7 @@ class BullsAndCowsGame:
         if self.game_state != GameState.IN_PROGRESS:
             raise RuntimeError("The game is not in progress")
 
-        if len(guess) != len(self.secret):
-            raise RuntimeError(f"Incorrect format: {guess}")
+        BullsAndCowsGame.validate_guess(guess)
 
         self.guess_count += 1
 
@@ -31,6 +30,12 @@ class BullsAndCowsGame:
             self.game_state = GameState.WON
 
         return (bulls, cows)
+
+
+    @staticmethod
+    def validate_guess(guess: str) -> None:
+        if not (len(guess) == 4 and guess.isdigit() and guess[0] != "0"):
+            raise RuntimeError(f"A guess must be a number from 1000 to 9999, got: {guess!r}")
 
 
     @staticmethod

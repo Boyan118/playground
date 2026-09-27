@@ -4,29 +4,96 @@ Precomputed Bulls & Cows feedback for every (guess, secret) pair, using numpy.
 Instead of calling `detect_bulls_and_cows` 81 million times in a Python loop,
 we describe every number with two small arrays (its digits and its digit
 counts) and let numpy compare all pairs at once through broadcasting.
+
+Use it through `FeedbackTable`; the functions below it are the implementation.
 """
+
+from collections.abc import Sequence
 
 import numpy as np
 
-NUMBERS = np.arange(1000, 10000)
-OFFSET = 1000  # table index of a number is `number - OFFSET`
+_NUMBERS = np.arange(1000, 10000)
+_OFFSET = 1000  # table index of a number is `number - _OFFSET`
 
 # Feedback is encoded as `bulls * 10 + cows`, so 23 means 2 bulls, 3 cows.
 # The largest code is 40 (4 bulls), which fits in a uint8 (0..255).
 _MAX_CODE = 40
 
 # Number of guesses (rows) processed per loop iteration; see the note on
-# chunking in `build_feedback_table`.
+# chunking in `_build_table`.
 _CHUNK = 500
 
 
-def build_feedback_table() -> np.ndarray:
+class FeedbackTable:
+    """
+    Bulls & Cows feedback for every (guess, secret) pair of numbers 1000-9999.
+
+    Numbers are passed and returned as strings, like everywhere else in the
+    game. Building the table takes a few seconds, so create it once and reuse it.
+    """
+
+    def __init__(self):
+        self._table = _build_table()
+        self.numbers: list[str] = [str(n) for n in _NUMBERS]
+        self.best_opening_guesses = self._find_best_opening_guesses()
+
+
+    def feedback(self, guess: str, secret: str) -> tuple[int, int]:
+        """(bulls, cows) for `guess` against `secret`."""
+        code = int(self._table[int(guess) - _OFFSET, int(secret) - _OFFSET])
+
+        return divmod(code, 10)
+
+
+    def entropies(
+            self,
+            guesses: Sequence[str] | None = None,
+            secrets: Sequence[str] | None = None) -> np.ndarray:
+        """
+        Expected information (bits) of each guess, when the secret is equally
+        likely to be any of `secrets`. Both default to all numbers.
+
+        Returns one value per guess, in the order of `guesses`.
+        """
+        rows = slice(None) if guesses is None else _indices(guesses)
+        columns = slice(None) if secrets is None else _indices(secrets)
+
+        if guesses is None or secrets is None:
+            # With a slice (":") on one axis, plain indexing already
+            # gives the block, e.g. table[:, columns].
+            sub_table = self._table[rows, columns]
+        else:
+            # np.ix_ selects every combination of the given rows and columns,
+            # giving a (len(guesses), len(secrets)) block of the table.
+            sub_table = self._table[np.ix_(rows, columns)]
+
+        return _row_entropies(sub_table)
+
+
+    def _find_best_opening_guesses(self) -> tuple[list[str], float]:
+        """The first guesses with the highest expected information, and that value."""
+        entropies = self.entropies()
+        best = entropies.max()
+
+        # isclose, not ==: equal entropies can differ in the last bit because
+        # of rounding, which would silently drop some of the best guesses.
+        best_indices = np.flatnonzero(np.isclose(entropies, best))
+
+        return [self.numbers[i] for i in best_indices], float(best)
+
+
+def _indices(numbers: Sequence[str]) -> np.ndarray:
+    """Table indices of the given numbers."""
+    return np.array([int(n) for n in numbers]) - _OFFSET
+
+
+def _build_table() -> np.ndarray:
     """
     Return a (9000, 9000) uint8 table where `table[g, s]` is the encoded
-    feedback for guess `g + OFFSET` against secret `s + OFFSET`.
+    feedback for guess `g + _OFFSET` against secret `s + _OFFSET`.
 
     Example: feedback for guess 1122 against secret 1234 is 1 bull, 1 cow:
-        table[1122 - OFFSET, 1234 - OFFSET] == 11
+        table[1122 - _OFFSET, 1234 - _OFFSET] == 11
     """
     # --- Step 1: split every number into its digits -----------------------
     # `number // 10**p % 10` picks out one digit:
@@ -34,13 +101,13 @@ def build_feedback_table() -> np.ndarray:
     #   p=2: 1234 //  100 % 10 = 2
     #   p=1: 1234 //   10 % 10 = 3
     #   p=0: 1234 //    1 % 10 = 4
-    # Each expression works on the whole NUMBERS array at once, and np.stack
+    # Each expression works on the whole _NUMBERS array at once, and np.stack
     # puts the four results side by side as columns:
-    #   digits[1234 - OFFSET] == [1, 2, 3, 4]
-    #   digits[1122 - OFFSET] == [1, 1, 2, 2]
+    #   digits[1234 - _OFFSET] == [1, 2, 3, 4]
+    #   digits[1122 - _OFFSET] == [1, 1, 2, 2]
     # Shape: (9000, 4).
     digits = np.stack(
-        [NUMBERS // 10**p % 10 for p in (3, 2, 1, 0)],
+        [_NUMBERS // 10**p % 10 for p in (3, 2, 1, 0)],
         axis=1,
     ).astype(np.int8)
 
@@ -57,7 +124,7 @@ def build_feedback_table() -> np.ndarray:
         axis=1,
     ).astype(np.int8)
 
-    n = len(NUMBERS)
+    n = len(_NUMBERS)
     table = np.empty((n, n), dtype=np.uint8)
 
     # --- Chunking --------------------------------------------------------
@@ -104,7 +171,7 @@ def build_feedback_table() -> np.ndarray:
     return table
 
 
-def row_entropies(table: np.ndarray) -> np.ndarray:
+def _row_entropies(table: np.ndarray) -> np.ndarray:
     """
     For each row (a guess), the entropy in bits of the feedback distribution
     over the row's columns (the possible secrets).
