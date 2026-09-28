@@ -3,6 +3,8 @@
 A collection of experiments and small games for exploring concepts hands-on.
 Each topic lives in its own package under `src/playground_package/`.
 
+**Live app:** [https://playground-fyhdqyovygsy7owe5igt9z.streamlit.app/](https://playground-fyhdqyovygsy7owe5igt9z.streamlit.app/)
+
 ## Prerequisites
 
 - Python 3.14
@@ -24,7 +26,8 @@ clone, and again if you recreate `.venv`.
 
 ## Streamlit app
 
-The Streamlit app hosts the interactive topic pages (currently Bulls & Cows):
+The Streamlit app hosts the interactive topic pages (currently Bulls & Cows).
+It's deployed at [https://playground-fyhdqyovygsy7owe5igt9z.streamlit.app/](https://playground-fyhdqyovygsy7owe5igt9z.streamlit.app/). To run it locally:
 
 ```bash
 uv run streamlit run src/playground_package/streamlit_app/main.py

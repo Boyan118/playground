@@ -28,8 +28,18 @@ When reporting what you did, show the commands you ran where they're useful
   notebooks, code, data and Streamlit `page.py`.
 - I start every idea in a notebook and move code into modules later, once it
   has settled. Don't push extraction early.
-- `src/playground_package/streamlit_app/main.py` registers the topic pages.
 - Backlog: @TASKS.md
+
+## Streamlit pages
+- Register each topic page in `src/playground_package/streamlit_app/main.py`
+  via `st.navigation`.
+- Follow the Bulls & Cows page (`bulls_and_cows/ui/page.py`) as the reference:
+  game logic lives in the topic's `code/`, the page only displays it;
+  typed `session_state` values; heavy data under `st.cache_resource`.
+- Check pages headlessly with `streamlit.testing.v1.AppTest` before calling a
+  UI change done.
+- Deployed on Streamlit Community Cloud (https://playground-fyhdqyovygsy7owe5igt9z.streamlit.app/) from `main`
+  (Python 3.14); every push redeploys.
 
 ## Commands
 - `uv sync`, `uv run pytest`, `uv run ruff check .`
