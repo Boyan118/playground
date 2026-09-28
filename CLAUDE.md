@@ -20,6 +20,9 @@ expand the scope of the task.
 Never stage, commit or push unless I explicitly ask. I review, stage and
 commit changes myself. Use `rm`, not `git rm`.
 
+Work happens on the `playground` branch. `main` is the stable branch the app
+deploys from: never commit to it, merge into it or push to it unless I ask.
+
 When reporting what you did, show the commands you ran where they're useful
 (e.g. `uv add --dev ruff`), so I can learn them and repeat them.
 
@@ -38,8 +41,10 @@ When reporting what you did, show the commands you ran where they're useful
   typed `session_state` values; heavy data under `st.cache_resource`.
 - Check pages headlessly with `streamlit.testing.v1.AppTest` before calling a
   UI change done.
-- Deployed on Streamlit Community Cloud (https://playground-fyhdqyovygsy7owe5igt9z.streamlit.app/) from `main`
-  (Python 3.14); every push redeploys.
+- Deployed on Streamlit Community Cloud
+  (https://playground-fyhdqyovygsy7owe5igt9z.streamlit.app/) from `main`,
+  Python 3.14. Every push to `main` redeploys; I publish with
+  `git push origin playground:main`.
 
 ## Commands
 - `uv sync`, `uv run pytest`, `uv run ruff check .`
