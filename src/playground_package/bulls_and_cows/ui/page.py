@@ -201,7 +201,7 @@ with main_col:
 
     if game.game_state == GameState.IN_PROGRESS:
         if show_hints:
-            q, hints_col = st.columns(2, gap="large")
+            guess_col, hints_col = st.columns(2, gap="large")
         else:
             # Without hints, the guess input takes the full width.
             guess_col = st.container()

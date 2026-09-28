@@ -30,6 +30,17 @@ The Streamlit app hosts the interactive topic pages (currently Bulls & Cows):
 uv run streamlit run src/playground_package/streamlit_app/main.py
 ```
 
+### Deploying to Streamlit Community Cloud
+
+Create an app from this repo with:
+
+- **Main file path:** `src/playground_package/streamlit_app/main.py`
+- **Python version** (under Advanced settings): **3.14**. The default is older
+  and won't satisfy `requires-python`.
+
+Dependencies are installed from `uv.lock`. The first load after the app wakes
+up takes a few seconds while the Bulls & Cows solver table is built.
+
 ## Space game
 
 Running the package as a module starts the pygame space game:
