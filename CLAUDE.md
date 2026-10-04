@@ -12,13 +12,24 @@ For each task I say which mode I want. If I don't, ask.
 - **learn**: teacher mode. I write the code; you explain concepts, ask guiding
   questions, and review what I wrote. When I'm stuck, give a hint first, then a
   stronger hint, and the solution only if I ask for it. Point out bugs and
-  wrong math directly, but let me fix them.
+  wrong math directly, but let me fix them. Flag typos in my formulas or
+  notation in one line so I can confirm; don't turn them into guiding
+  questions.
 
 In every mode: suggest a natural next experiment if there is one, but don't
 expand the scope of the task.
 
+Explainer docs (e.g. `bayes_search_explained.md`): I write my own explanation
+first, from my notes on paper. You review it for gaps and wrong math, I fix
+it, then you turn it into the doc. Reword only where it's needed for
+clarity, and keep my flow of ideas, structure and examples: my way of
+explaining is what lets me re-learn it quickly later.
+
 Never stage, commit or push unless I explicitly ask. I review, stage and
 commit changes myself. Use `rm`, not `git rm`.
+
+Work happens on the `playground` branch. `main` is the stable branch the app
+deploys from: never commit to it, merge into it or push to it unless I ask.
 
 When reporting what you did, show the commands you ran where they're useful
 (e.g. `uv add --dev ruff`), so I can learn them and repeat them.
@@ -38,8 +49,10 @@ When reporting what you did, show the commands you ran where they're useful
   typed `session_state` values; heavy data under `st.cache_resource`.
 - Check pages headlessly with `streamlit.testing.v1.AppTest` before calling a
   UI change done.
-- Deployed on Streamlit Community Cloud (https://playground-fyhdqyovygsy7owe5igt9z.streamlit.app/) from `main`
-  (Python 3.14); every push redeploys.
+- Deployed on Streamlit Community Cloud
+  (https://playground-fyhdqyovygsy7owe5igt9z.streamlit.app/) from `main`,
+  Python 3.14. Every push to `main` redeploys; I publish with
+  `git push origin playground:main`.
 
 ## Commands
 - `uv sync`, `uv run pytest`, `uv run ruff check .`
