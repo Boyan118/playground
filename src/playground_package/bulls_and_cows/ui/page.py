@@ -30,31 +30,33 @@ feedback_table = load_feedback_table()
 # ---------------------------------------------------------------------------
 # Game state
 # ---------------------------------------------------------------------------
+# st.session_state is shared by all pages of the app, so every key here starts
+# with "bc_" to stay clear of the other pages.
 
 def new_game():
-    st.session_state.game = BullsAndCowsGame()
-    st.session_state.strategy = EntropyStrategy(feedback_table)
-    st.session_state.history = []
+    st.session_state.bc_game = BullsAndCowsGame()
+    st.session_state.bc_strategy = EntropyStrategy(feedback_table)
+    st.session_state.bc_history = []
     # (possibilities left, uncertainty in bits) at the start and after each guess
-    st.session_state.status_trail = [
+    st.session_state.bc_status_trail = [
         (
-            len(st.session_state.strategy.remaining_possibilities),
-            st.session_state.strategy.initial_entropy,
+            len(st.session_state.bc_strategy.remaining_possibilities),
+            st.session_state.bc_strategy.initial_entropy,
         )
     ]
-    st.session_state.suggestions = None
-    st.session_state.celebrate = False
+    st.session_state.bc_suggestions = None
+    st.session_state.bc_celebrate = False
 
 
-if "game" not in st.session_state:
+if "bc_game" not in st.session_state:
     new_game()
 
 # session_state values are untyped; annotate them to get type checking and
 # autocompletion back.
-game: BullsAndCowsGame = st.session_state.game
-strategy: EntropyStrategy = st.session_state.strategy
-history: list[dict] = st.session_state.history
-status_trail: list[tuple[int, float]] = st.session_state.status_trail
+game: BullsAndCowsGame = st.session_state.bc_game
+strategy: EntropyStrategy = st.session_state.bc_strategy
+history: list[dict] = st.session_state.bc_history
+status_trail: list[tuple[int, float]] = st.session_state.bc_status_trail
 
 
 # ---------------------------------------------------------------------------
@@ -95,7 +97,7 @@ def submit_guess(guess: str):
     )
 
     if game.game_state == GameState.WON:
-        st.session_state.celebrate = True
+        st.session_state.bc_celebrate = True
 
 
 def current_suggestions() -> list[tuple[str, float]]:
@@ -105,11 +107,11 @@ def current_suggestions() -> list[tuple[str, float]]:
     Computed once per turn: the page reruns on every interaction, and
     recomputing would reshuffle the first-turn suggestions each time.
     """
-    cached = st.session_state.suggestions
+    cached = st.session_state.bc_suggestions
 
     if cached is None or cached[0] != game.guess_count:
         cached = (game.guess_count, strategy.generate_top_guesses())
-        st.session_state.suggestions = cached
+        st.session_state.bc_suggestions = cached
 
     return cached[1]
 
@@ -195,9 +197,9 @@ with main_col:
         # `celebrate` is set when a game is won, so the balloons fly once per win.
         # Without the flag they would fly again on every rerun while the win
         # message is showing, e.g. when toggling "Show secret".
-        if st.session_state.celebrate:
+        if st.session_state.bc_celebrate:
             st.balloons()
-            st.session_state.celebrate = False
+            st.session_state.bc_celebrate = False
 
     if game.game_state == GameState.IN_PROGRESS:
         if show_hints:
@@ -207,7 +209,7 @@ with main_col:
             guess_col = st.container()
 
         with guess_col:
-            with st.form("guess_form", clear_on_submit=True, border=False):
+            with st.form("bc_guess_form", clear_on_submit=True, border=False):
                 guess = st.text_input(
                     "Your guess",
                     max_chars=4,
@@ -235,7 +237,7 @@ with main_col:
                 for suggested_guess, expected_bits in current_suggestions():
                     st.button(
                         f"{suggested_guess} · {expected_bits:.2f} bits",
-                        key=f"suggested_guess_{suggested_guess}",
+                        key=f"bc_suggested_guess_{suggested_guess}",
                         width="stretch",
                         on_click=submit_guess,
                         args=(suggested_guess,),

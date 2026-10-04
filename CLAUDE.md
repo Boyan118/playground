@@ -12,10 +12,18 @@ For each task I say which mode I want. If I don't, ask.
 - **learn**: teacher mode. I write the code; you explain concepts, ask guiding
   questions, and review what I wrote. When I'm stuck, give a hint first, then a
   stronger hint, and the solution only if I ask for it. Point out bugs and
-  wrong math directly, but let me fix them.
+  wrong math directly, but let me fix them. Flag typos in my formulas or
+  notation in one line so I can confirm; don't turn them into guiding
+  questions.
 
 In every mode: suggest a natural next experiment if there is one, but don't
 expand the scope of the task.
+
+Explainer docs (e.g. `bayes_search_explained.md`): I write my own explanation
+first, from my notes on paper. You review it for gaps and wrong math, I fix
+it, then you turn it into the doc. Reword only where it's needed for
+clarity, and keep my flow of ideas, structure and examples: my way of
+explaining is what lets me re-learn it quickly later.
 
 Never stage, commit or push unless I explicitly ask. I review, stage and
 commit changes myself. Use `rm`, not `git rm`.

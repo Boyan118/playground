@@ -28,6 +28,25 @@
       },
       "console": "integratedTerminal",
       "justMyCode": true
+    },
+    {
+      "name": "Streamlit: Debug app",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "streamlit",
+      "args": [
+        "run",
+        "${workspaceFolder}/src/playground_package/streamlit_app/main.py",
+        "--server.runOnSave",
+        "true"
+      ],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        // Also makes Streamlit reload edited modules under src/, not only the page scripts
+        "PYTHONPATH": "${workspaceFolder}/src"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": true
     }
   ]
 }
