@@ -117,24 +117,57 @@ def current_suggestions() -> list[tuple[str, float]]:
 
 
 # ---------------------------------------------------------------------------
-# Layout
+# Layout (see CLAUDE.md): controls on the left; on the right the header, then
+# the game and its metrics.
 # ---------------------------------------------------------------------------
 
-# The empty right column is a spacer that keeps the game area centred.
-status_col, main_col, _ = st.columns([1, 3, 1], gap="large")
+controls_col, content_col = st.columns([1, 4], gap="large")
 
 
 # ---------------------------------------------------------------------------
-# Status column (left): display options and game state
+# Controls column (left): controls that restart the game, then those that don't
 # ---------------------------------------------------------------------------
 
-with status_col:
-    show_hints = st.toggle("Show hints", value=True)
-    show_secret = st.toggle("Show secret", value=False)
+with controls_col:
+    # Restart the game
+    with st.container(border=True):
+        st.button(
+            "🔄 New game",
+            width="stretch",
+            on_click=new_game,
+        )
 
-    if show_secret:
-        st.info(f"🤫 The secret is **{game.secret}**")
+    # Don't restart the game: they only change what you see
+    with st.container(border=True):
+        show_hints = st.toggle("Show hints", value=True)
+        show_secret = st.toggle("Show secret", value=False)
 
+        if show_secret:
+            st.info(f"🤫 The secret is **{game.secret}**")
+
+
+# ---------------------------------------------------------------------------
+# Header (above the centre and right columns)
+# ---------------------------------------------------------------------------
+
+with content_col:
+    # The same [3, 1] split as below keeps the header in line with the game.
+    # The right part is where a "How it works" button would go.
+    title_col, _ = st.columns([3, 1], gap="large", vertical_alignment="top")
+    title_col.title("🐂 Bulls & Cows")
+    title_col.markdown(
+        "Guess the secret 4-digit number. 🐂 bull = right digit in the right "
+        "place, 🐄 cow = right digit in the wrong place."
+    )
+
+    main_col, info_col = st.columns([3, 1], gap="large")
+
+
+# ---------------------------------------------------------------------------
+# Info column (right): metrics about the game state
+# ---------------------------------------------------------------------------
+
+with info_col:
     (remaining, bits_left) = status_trail[-1]
 
     # Change since the previous guess; nothing to compare before the first one.
@@ -171,24 +204,11 @@ with status_col:
 
 
 # ---------------------------------------------------------------------------
-# Main column (centre): header, win message, guess input and hints, history
+# Main column (centre): win message, guess input and hints, history
 # ---------------------------------------------------------------------------
 
-with main_col:
-    # The header lives in the main column so it lines up with the game.
-    title_col, new_game_col = st.columns([3, 1], vertical_alignment="center")
-    title_col.title("🐂 Bulls & Cows")
-    new_game_col.button(
-        "🔄 New game",
-        width="stretch",
-        on_click=new_game,
-    )
-
-    st.caption(
-        "Guess the secret 4-digit number. 🐂 bull = right digit in the right "
-        "place, 🐄 cow = right digit in the wrong place."
-    )
-
+# The play area in one box: guessing, hints and the history of your guesses
+with main_col.container(border=True):
     if game.game_state == GameState.WON:
         st.success(
             f"🎉 You solved it in {game.guess_count} guesses! The secret was **{game.secret}**."

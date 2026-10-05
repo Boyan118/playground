@@ -47,6 +47,21 @@ When reporting what you did, show the commands you ran where they're useful
 - Follow the Bulls & Cows page (`bulls_and_cows/ui/page.py`) as the reference:
   game logic lives in the topic's `code/`, the page only displays it;
   typed `session_state` values; heavy data under `st.cache_resource`.
+- Game page layout (both games follow it):
+  - Columns: controls `[1, 4]` content; the content splits `[3, 1]` into the
+    game and its metrics. The header spans the content, so the metrics start
+    level with the game.
+  - Header: the title with the "How it works" (learn) button in its row, then
+    the rules in a sentence or two. A game without an explainer page leaves
+    the button slot empty.
+  - Left column: game controls in two bordered groups: controls that restart
+    the game (e.g. board size, New game), then controls that don't (view
+    options, and what they reveal, e.g. the secret).
+  - Centre column: one bordered play area with what you do to play, the most
+    important visual, results (win message) and the history below.
+  - Right column: less important metrics about the game and its state.
+  - Prefix `session_state` keys per page (`bc_`, `sub_`): the state is shared
+    across pages.
 - Check pages headlessly with `streamlit.testing.v1.AppTest` before calling a
   UI change done.
 - Deployed on Streamlit Community Cloud
