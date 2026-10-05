@@ -215,37 +215,72 @@ def show_map(values, value_label, value_format, chart_key, **markers):
 
 
 # ---------------------------------------------------------------------------
-# Layout
+# Layout (see CLAUDE.md): header row; controls on the left, the game in the
+# centre, less important metrics on the right.
 # ---------------------------------------------------------------------------
 
-# The empty right column is a spacer that keeps the game area centred.
-status_col, main_col, _ = st.columns([1, 3, 0.3], gap="large")
+# Controls on the left; on the right the header, then the game and its metrics
+controls_col, content_col = st.columns([1, 4], gap="large")
 
 
 # ---------------------------------------------------------------------------
-# Status column (left): game settings, display options and game state
+# Controls column (left): controls that restart the game, then those that don't
 # ---------------------------------------------------------------------------
 
-with status_col:
-    st.selectbox(
-        "Board size",
-        BOARD_SIZES,
-        index=0,  # Small, the same default new_game() falls back to
-        key="sub_board_size",
-        on_change=new_game,
+with controls_col:
+    # Restart the game
+    with st.container(border=True):
+        st.selectbox(
+            "Board size",
+            BOARD_SIZES,
+            index=0,  # Small, the same default new_game() falls back to
+            key="sub_board_size",
+            on_change=new_game,
+        )
+        hypothesis = st.radio(
+            "Your hypothesis",
+            HYPOTHESES,
+            format_func=lambda option: HYPOTHESES[option][0],
+            key="sub_hypothesis",
+            on_change=restart_game,
+        )
+        st.caption(HYPOTHESES[hypothesis][1])  # only the selected option's explanation
+
+        st.button("🔄 New game", width="stretch", on_click=new_game)
+
+    # Don't restart the game: they only change what you see
+    with st.container(border=True):
+        show_advisors = st.toggle("Show advisors", value=True)
+        show_sub = st.toggle("Show the sub", value=False)
+
+
+# ---------------------------------------------------------------------------
+# Header (above the centre and right columns)
+# ---------------------------------------------------------------------------
+
+with content_col:
+    # Header across the game and its metrics, so the metrics start level with the game.
+    # The same [3, 1] split as below puts the button above the metrics column.
+    # Aligned to the top, so the button stays level with the title, not with the text below it
+    title_col, how_it_works_col = st.columns([3, 1], gap="large", vertical_alignment="top")
+    title_col.title("🚢 Find the Sub")
+    title_col.markdown(
+        f"Click a square to ping it. A ping on the sub's square detects it "
+        f"{SENSOR_SPEC.p_hit:.0%} of the time, and that wins. A ping next to the sub "
+        f"gives a false alarm {SENSOR_SPEC.p_near:.0%} of the time, further away "
+        f"{SENSOR_SPEC.p_far:.1%}. After every ping, the map updates with Bayes' rule."
     )
-    hypothesis = st.radio(
-        "Your hypothesis",
-        HYPOTHESES,
-        format_func=lambda option: HYPOTHESES[option][0],
-        key="sub_hypothesis",
-        on_change=restart_game,
-    )
-    st.caption(HYPOTHESES[hypothesis][1])  # only the selected option's explanation
+    if how_it_works_col.button("📖 How it works", width="stretch"):
+        st.switch_page("../find_the_sub_game/ui/how_it_works_page.py")
 
-    show_advisors = st.toggle("Show advisors", value=True)
-    show_sub = st.toggle("Show the sub", value=False)
+    main_col, info_col = st.columns([3, 1], gap="large")
 
+
+# ---------------------------------------------------------------------------
+# Info column (right): less important metrics about the game
+# ---------------------------------------------------------------------------
+
+with info_col:
     st.metric("Pings", len(history), border=True)
 
     bits_delta = f"{entropy_trail[-1] - entropy_trail[-2]:.2f} bits" if len(entropy_trail) > 1 else None
@@ -263,21 +298,11 @@ with status_col:
 
 
 # ---------------------------------------------------------------------------
-# Main column (centre): header, win message, advisors, maps, history
+# Main column (centre): what you do to play and the map; history below
 # ---------------------------------------------------------------------------
 
-with main_col:
-    title_col, new_game_col = st.columns([3, 1], vertical_alignment="center")
-    title_col.title("🚢 Find the Sub")
-    new_game_col.button("🔄 New game", width="stretch", on_click=new_game)
-
-    st.caption(
-        f"Click a square to ping it. A ping on the sub's square detects it "
-        f"{SENSOR_SPEC.p_hit:.0%} of the time, and that wins. A ping next to the sub "
-        f"gives a false alarm {SENSOR_SPEC.p_near:.0%} of the time, further away "
-        f"{SENSOR_SPEC.p_far:.1%}. After every ping, the map updates with Bayes' rule."
-    )
-
+# The play area in one box: advisors, maps and the history of your pings
+with main_col.container(border=True):
     sub_location = game.sub_location if (show_sub or won) else None
     last_ping = st.session_state.sub_last_ping
 

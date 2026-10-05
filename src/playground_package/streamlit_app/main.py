@@ -8,30 +8,27 @@ import streamlit as st
 # parents[2] is the `src` directory.
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-# A dict groups the pages under a heading per topic in the sidebar.
-pg = st.navigation({
-    "Bulls & Cows": [
-        st.Page(
-            "../bulls_and_cows/ui/page.py",
-            title="Bulls & Cows",
-            url_path="bulls-and-cows",
-            icon="🐂",
-        ),
-    ],
-    "Find the Sub": [
-        st.Page(
-            "../find_the_sub_game/ui/page.py",
-            title="Find the Sub",
-            url_path="find-the-sub",
-            icon="🚢",
-        ),
-        st.Page(
-            "../find_the_sub_game/ui/how_it_works_page.py",
-            title="How it works",
-            url_path="find-the-sub-how-it-works",
-            icon="📖",
-        ),
-    ],
-})
+pg = st.navigation([
+    st.Page(
+        "../bulls_and_cows/ui/page.py",
+        title="Bulls & Cows",
+        url_path="bulls-and-cows",
+        icon="🐂",
+    ),
+    st.Page(
+        "../find_the_sub_game/ui/page.py",
+        title="Find the Sub",
+        url_path="find-the-sub",
+        icon="🚢",
+    ),
+    # Not in the menu: reached from the "How it works" button on the Find the Sub page
+    st.Page(
+        "../find_the_sub_game/ui/how_it_works_page.py",
+        title="Find the Sub: how it works",
+        url_path="find-the-sub-how-it-works",
+        icon="📖",
+        visibility="hidden",
+    ),
+])
 
 pg.run()
