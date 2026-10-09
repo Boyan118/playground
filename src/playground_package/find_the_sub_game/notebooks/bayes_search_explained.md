@@ -1,5 +1,13 @@
 # Bayesian search: the sub game
 
+## Goal
+- Learn about Bayes' theorem.
+
+But it also turned out to be an excellent playground for:
+- understanding how to apply entropy, and how to use it to find the next
+  square to ping;
+- understanding, in a very intuitive setting, how to read a confusion matrix.
+
 ## Setup
 - A map of squares.
 - A **prior**: how likely the sub is to be in each square. It could be because
@@ -10,11 +18,11 @@
 
 Sensor spec, for a ping on square X:
 
-| Where the sub is      | P(Det_X) | P(ND_X) |                                  |
-|-----------------------|----------|---------|----------------------------------|
-| in X                  | 0.8      | 0.2     | a miss is a false negative       |
-| next to X             | 0.25     | 0.75    | a detect is a false positive     |
-| far from X            | 0.001    | 0.999   | a detect is a false positive     |
+| Where the sub is      | P(Det_X) | P(ND_X) |                                              |
+|-----------------------|----------|---------|----------------------------------------------|
+| in X                  | 0.8      | 0.2     | a miss is a false negative (Type II error)   |
+| next to X             | 0.25     | 0.75    | a detect is a false positive (Type I error)  |
+| far from X            | 0.001    | 0.999   | a detect is a false positive (Type I error)  |
 
 Notation: `Det_X` means "we pinged X and got a Detect", and `ND_X` means "we
 pinged X and got No_Detect".
@@ -85,3 +93,86 @@ Either way, the updated map becomes the prior for the next turn.
   This is why the sensor's spec (what the searcher knows) and the real world
   (where the sub is) are separate things. See finding #6 in
   `sub_game_review.md`.
+
+## How to use entropy to decide which square to ping
+The formula for entropy is
+
+    H = -sum(p * log2(p))
+
+The sum is over all the squares, and p is the probability that the sub is in
+the square. The result is the uncertainty in bits. In other words, it is the
+number of ideal yes/no questions we need to ask, on average, to solve the game.
+
+We can calculate the entropy of the map now, H(now). Then for each square we
+have two options:
+- ping and get a Detect;
+- ping and get a No_Detect.
+
+As in the calculations above, we can work out the updated map for each
+option, and therefore calculate the entropy of each updated map: H(after Det)
+and H(after ND).
+
+The expected entropy after the ping weights the two by how likely they are:
+
+    E[H(after)] = P(Det) * H(after Det) + P(ND) * H(after ND)
+
+where P(Det) is the denominator from the Bayes update above (0.3455 for a ping
+on A), and P(ND) = 1 - P(Det).
+
+The information gain is how much the ping is expected to reduce the entropy:
+
+    information gain = H(now) - E[H(after)]
+
+Calculating this for all squares lets us choose the square with the biggest
+information gain.
+
+A really cool experiment is to look at the moves recommended by this criterion,
+starting with a uniform map.
+
+
+## How to interpret a confusion matrix
+Let's simplify the specification of the ping sensor in the following way:
+- if the sub is in the square, there is an 80% probability to get a positive
+  reading, and 20% to get a negative reading (false negative, Type II error);
+- if the sub is not in the square, there is a 5% probability to get a positive
+  reading (false positive, Type I error), and 95% to get a negative reading.
+
+Let's place this into a table (each row sums to 100%):
+
+|                   | Sensor: 1 | Sensor: 0 |
+|-------------------|-----------|-------------------|
+| **Actual: 1** (sub there)    | 80% (TP)  | 20% (FN, Type II) |
+| **Actual: 0** (no sub)       | 5% (FP, Type I) | 95% (TN)  |
+
+In statistics, a false positive is a **Type I error** and a false negative is
+a **Type II error**. Their rates are called α (here 5%) and β (here
+20%), and 1 - β is the power (80%), which is the same as recall below.
+
+We can think of the sensor as an ML model too: a classifier. But for me the
+sensor version became an easy mental shortcut to reason about the problem
+intuitively.
+
+What is the accuracy of this sensor/model? Accuracy measures, out of all the
+trials, how many times we got the correct result. Let's suppose there are 10
+squares with a sub and 1000 squares without one:
+
+    TP = 80% of 10   = 8
+    FN = 20% of 10   = 2
+    TN = 95% of 1000 = 950
+    FP =  5% of 1000 = 50
+
+    accuracy = (TP + TN) / (TP + FP + TN + FN) = 958 / 1010 = ~95%
+
+But if you get a positive, the probability that it is a true positive is
+TP / (TP + FP) = 8 / 58 = ~14%. This might be a little surprising, given that
+the accuracy of the sensor is 95%. The reason: there are so many empty squares
+that their 5% false positives (50) swamp the real detections (8). Accuracy
+even rewards a useless sensor: one that always says 0 would get
+1000 / 1010 = ~99%.
+
+There are two popular metrics that address this:
+- **Recall:** TP / (TP + FN) = 8 / 10 = 80%. If the sub is really in the
+  square, how often does the sensor detect it?
+- **Precision:** TP / (TP + FP) = 8 / 58 = ~14%. If the sensor gives a
+  positive, how often is the sub really there?
+

@@ -152,13 +152,15 @@ with controls_col:
 
 with content_col:
     # The same [3, 1] split as below keeps the header in line with the game.
-    # The right part is where a "How it works" button would go.
-    title_col, _ = st.columns([3, 1], gap="large", vertical_alignment="top")
+    # Aligned to the top, so the button stays level with the title, not with the text below it
+    title_col, how_it_works_col = st.columns([3, 1], gap="large", vertical_alignment="top")
     title_col.title("🐂 Bulls & Cows")
     title_col.markdown(
         "Guess the secret 4-digit number. 🐂 bull = right digit in the right "
         "place, 🐄 cow = right digit in the wrong place."
     )
+    if how_it_works_col.button("📖 How it works", width="stretch"):
+        st.switch_page("../bulls_and_cows/ui/how_it_works_page.py")
 
     main_col, info_col = st.columns([3, 1], gap="large")
 

@@ -15,6 +15,14 @@ pg = st.navigation([
         url_path="bulls-and-cows",
         icon="🐂",
     ),
+    # Not in the menu: reached from the "How it works" button on the Bulls & Cows page
+    st.Page(
+        "../bulls_and_cows/ui/how_it_works_page.py",
+        title="Bulls & Cows: how it works",
+        url_path="bulls-and-cows-how-it-works",
+        icon="📖",
+        visibility="hidden",
+    ),
     st.Page(
         "../find_the_sub_game/ui/page.py",
         title="Find the Sub",
